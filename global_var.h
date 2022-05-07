@@ -5,6 +5,7 @@
 /********************************************************/
 Parameters params;                  
 FILE *output;                       // output file
+FILE *traindata;                    // file for saving training data
 Problem *SP;                        // original problem instance
 Problem *PP;                        // subproblem instance
 double root_bound;                  // SDP upper bound at root node

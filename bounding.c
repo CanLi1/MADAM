@@ -4,6 +4,7 @@
 
 extern Parameters params;
 extern FILE *output;
+extern FILE *traindata;
 extern int BabPbSize;
 
 extern double TIME;                 
@@ -68,6 +69,21 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
 
     /* solve basic SDP relaxation with interior-point method */
     ipm_mc_pk(PP->L, PP->n, X, y, Q, &f, 0);
+
+    //save basic info of the node
+    fprintf(traindata,"%d ", PP->n);
+
+    //get the number of nonzeros in L
+    int nzero = 0;
+    for (int i = 0; i < PP->n; ++i) {
+        for (int j = 0; j < PP->n; ++j) {
+            if (fabs(PP->L[j + i * PP->n]) > 0.00001)
+                nzero ++;
+        }
+    }
+    fprintf(traindata,"%d ", nzero);
+    //store training data for basic SDP
+    fprintf(traindata,"[0 %.3f %.3f]", f + fixedvalue, Bab_LBGet());
 
     // store basic SDP bound to compute diff in the root node
     double basic_bound = f + fixedvalue;
@@ -138,6 +154,9 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
 
         // prune test
         prune = ( bound < Bab_LBGet() + 1.0 ) ? 1 : 0;
+
+        //save iteration info for training data
+        fprintf(traindata,"[%d %.3f %.3f]", count, f + fixedvalue, Bab_LBGet());
  
         /******** heuristic ********/
         if (!prune) {
@@ -236,7 +255,7 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     } // end while loop
 
     bound = f + fixedvalue;
-
+    fprintf(traindata,"\n");
     // compute difference between basic SDP relaxation and bound with added cutting planes
     if (rank == 0) {
         diff = basic_bound - bound;

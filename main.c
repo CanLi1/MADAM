@@ -10,6 +10,7 @@ extern double diff;
 extern Parameters params;
 extern double TIME;
 extern FILE *output;
+extern  FILE *traindata;
 
 int num_workers_used = 0;
 
@@ -246,6 +247,7 @@ int main(int argc, char **argv) {
 	printf("Maximum number of workers used: %d\n", num_workers_used);
         fclose(output);
     }
+    fclose(traindata);
 
     /* free memory */
     Bab_End();

@@ -7,6 +7,7 @@
 #include "admm.h"
 
 extern FILE *output;
+extern FILE *traindata;
 extern Parameters params;
 extern Problem *SP;             
 extern Problem *PP;            
@@ -40,11 +41,15 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
 
     if (argc != 3) {
         if (rank == 0)
-            fprintf(stderr, "Usage: ./biqbin file.rudy file.params\n");
+            fprintf(stderr, "Usage: ./admm file.rudy file.params\n");
         read_error = 1;
         return read_error;
     }
 
+    //Create training data file
+    char traindata_path[200];
+    sprintf(traindata_path, "%s.traindata%d", argv[1], rank);
+    traindata = fopen(traindata_path, "w");
     /***** only master process creates output file and reads the whole graph *****/
 
     // Control the command line arguments
@@ -53,6 +58,7 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
         // Create the output file
         char output_path[200];
         sprintf(output_path, "%s.output", argv[1]);
+
 
         // Check if the file already exists, if so aappend _<NUMBER> to the end of the output file name
         struct stat buffer;
@@ -69,6 +75,8 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
             return read_error;
         }
 
+
+
         // Read the input file instance
         read_error = readData(argv[1]);
 
@@ -84,7 +92,6 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
             
     }
     else {
-
         MPI_Bcast(&read_error, 1, MPI_INT, 0, MPI_COMM_WORLD);
         if (read_error) 
             return read_error;    

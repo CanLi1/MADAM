@@ -10,6 +10,7 @@ extern double diff;
 extern Parameters params;
 extern double TIME;
 extern FILE *output;
+extern FILE *traindata;
 
 int num_workers_used = 0;
 

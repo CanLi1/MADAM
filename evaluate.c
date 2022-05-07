@@ -2,6 +2,7 @@
 
 extern Parameters params;
 extern FILE *output;
+extern FILE *traindata;
 extern int BabPbSize;      
 
 /*
