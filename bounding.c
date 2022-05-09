@@ -24,7 +24,7 @@ extern double diff;		            // difference between basic SDP relaxation and 
 
 /******** main bounding routine calling ADMM method ********/
 double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
-
+    printf("calling SDP bound start\n");
     int index;                      // helps to store the fractional solution in the node
     double bound;                   // f + fixedvalue
     double gap;                     // difference between best lower bound and upper bound
@@ -81,9 +81,8 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
                 nzero ++;
         }
     }
-    fprintf(traindata,"%d ", nzero);
-    //store training data for basic SDP
-    fprintf(traindata,"[0 %.3f %.3f]", f + fixedvalue, Bab_LBGet());
+    fprintf(traindata,"%d %.3f", nzero, fixedvalue);
+
 
     // store basic SDP bound to compute diff in the root node
     double basic_bound = f + fixedvalue;
@@ -117,6 +116,9 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     // upper bound
     bound = f + fixedvalue;
 
+    //store training data for basic SDP
+    fprintf(traindata,"[0 %.3f %.3f", bound, Bab_LBGet());
+
     // check pruning condition
     if ( bound < Bab_LBGet() + 1.0 ) {
         prune = 1;
@@ -124,10 +126,10 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     }
 
     // check if cutting planes need to be added     
-    if (params.use_diff && (rank != 0) && (bound > Bab_LBGet() + diff + 1.0)) {
-        giveup = 1;
-        goto END;
-    }
+//    if (params.use_diff && (rank != 0) && (bound > Bab_LBGet() + diff + 1.0)) {
+//        giveup = 1;
+//        goto END;
+//    }
 
     /* separate first triangle inequality */
     viol3 = updateTriangleInequalities(PP, s, &Tri_NumAdded, &Tri_NumSubtracted);
@@ -156,7 +158,7 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
         prune = ( bound < Bab_LBGet() + 1.0 ) ? 1 : 0;
 
         //save iteration info for training data
-        fprintf(traindata,"[%d %.3f %.3f]", count, f + fixedvalue, Bab_LBGet());
+        fprintf(traindata,"[%d %.3f %.3f", count, f + fixedvalue, Bab_LBGet());
  
         /******** heuristic ********/
         if (!prune) {
@@ -255,14 +257,15 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     } // end while loop
 
     bound = f + fixedvalue;
-    fprintf(traindata,"\n");
+
     // compute difference between basic SDP relaxation and bound with added cutting planes
     if (rank == 0) {
         diff = basic_bound - bound;
     }
 
     END:
-      
+    fprintf(traindata,"\n");
+    printf("calling SDP bound end\n");
 
     return bound;
 

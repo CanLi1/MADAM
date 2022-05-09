@@ -26,11 +26,11 @@ Parameters:
             use_diff = 1
    branchingStrategy = 1
 
-Nodes = 599
+Nodes = 603
 Root node bound = 350.01
 Maximum value = 324
 Solution = ( 2 3 5 7 8 12 17 18 19 20 22 23 24 26 30 31 34 35 37 39 41 43 45 50 51 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 70 72 76 78 79 82 83 85 87 89 90 91 93 94 95 97 98 )
-Time = 31.10 s
+Time = 30.42 s
 
 Number of cores: 10
 Maximum number of workers used: 9
