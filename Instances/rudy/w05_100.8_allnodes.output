@@ -1,0 +1,36 @@
+Input file: Instances/rudy/w05_100.8
+
+Graph has 100 vertices and 2475 edges.
+Parameters:
+              sigma0 = 1.000000
+          scaleSigma = 1.001000
+        ADMM_itermax = 2000
+                tol0 = 0.050000
+            scaleTol = 0.600000
+              minTol = 0.001000
+          triag_iter = 3
+           pent_iter = 3
+           hept_iter = 3
+      max_outer_iter = 12
+          extra_iter = 5
+    violated_TriIneq = 0.001000
+             TriIneq = 1000
+      adjust_TriIneq = 1
+            PentIneq = 5000
+           HeptaIneq = 5000
+         Pent_Trials = 60
+        Hepta_Trials = 50
+        include_Pent = 1
+       include_Hepta = 1
+                root = 0
+            use_diff = 1
+   branchingStrategy = 1
+
+Nodes = 103
+Root node bound = 1395.73
+Maximum value = 1311
+Solution = ( 3 4 5 6 10 11 13 14 15 17 18 20 21 22 23 26 31 34 39 41 45 47 49 50 51 52 54 57 61 63 64 65 68 69 70 71 73 75 78 79 82 83 85 88 93 94 95 96 99 )
+Time = 52.62 s
+
+Number of cores: 10
+Maximum number of workers used: 9

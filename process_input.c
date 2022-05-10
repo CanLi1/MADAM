@@ -39,33 +39,45 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
 
     int read_error = 0;
 
-    if (argc != 3) {
+    if (argc != 4) {
         if (rank == 0)
-            fprintf(stderr, "Usage: ./admm file.rudy file.params\n");
+            fprintf(stderr, "Usage: ./admm file.rudy file.params jobname\n");
         read_error = 1;
         return read_error;
     }
 
     //Create training data file
     char traindata_path[200];
-    sprintf(traindata_path, "%s.traindata%d", argv[1], rank);
+    sprintf(traindata_path, "%s_%s.traindata%d", argv[1], argv[3], rank);
     traindata = fopen(traindata_path, "w");
     /***** only master process creates output file and reads the whole graph *****/
 
     // Control the command line arguments
     if (rank == 0) {
 
+//        // Create the output file
+//        char output_path[200];
+//        sprintf(output_path, "%s.output", argv[1]);
+//
+//
+//        // Check if the file already exists, if so aappend _<NUMBER> to the end of the output file name
+//        struct stat buffer;
+//        int counter = 1;
+//
+//        while (stat(output_path, &buffer) == 0)
+//            sprintf(output_path, "%s.output_%d", argv[1], counter++);
+//
+//        output = fopen(output_path, "w");
+//        if (!output) {
+//            fprintf(stderr, "Error: Cannot create output file.\n");
+//            read_error = 1;
+//            MPI_Bcast(&read_error, 1, MPI_INT, 0, MPI_COMM_WORLD);
+//            return read_error;
+//        }
+
         // Create the output file
         char output_path[200];
-        sprintf(output_path, "%s.output", argv[1]);
-
-
-        // Check if the file already exists, if so aappend _<NUMBER> to the end of the output file name
-        struct stat buffer;
-        int counter = 1;
-        
-        while (stat(output_path, &buffer) == 0)
-            sprintf(output_path, "%s.output_%d", argv[1], counter++);
+        sprintf(output_path, "%s_%s.output", argv[1], argv[3]);
 
         output = fopen(output_path, "w");
         if (!output) {
@@ -74,7 +86,6 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
             MPI_Bcast(&read_error, 1, MPI_INT, 0, MPI_COMM_WORLD);
             return read_error;
         }
-
 
 
         // Read the input file instance

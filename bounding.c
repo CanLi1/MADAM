@@ -24,7 +24,8 @@ extern double diff;		            // difference between basic SDP relaxation and 
 
 /******** main bounding routine calling ADMM method ********/
 double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
-    printf("calling SDP bound start\n");
+//    printf("calling SDP bound start\n");
+    double sdpstartime = MPI_Wtime();
     int index;                      // helps to store the fractional solution in the node
     double bound;                   // f + fixedvalue
     double gap;                     // difference between best lower bound and upper bound
@@ -126,10 +127,10 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     }
 
     // check if cutting planes need to be added     
-//    if (params.use_diff && (rank != 0) && (bound > Bab_LBGet() + diff + 1.0)) {
-//        giveup = 1;
-//        goto END;
-//    }
+    if (params.use_diff && (rank != 0) && (bound > Bab_LBGet() + diff + 1.0)) {
+        giveup = 1;
+        goto END;
+    }
 
     /* separate first triangle inequality */
     viol3 = updateTriangleInequalities(PP, s, &Tri_NumAdded, &Tri_NumSubtracted);
@@ -264,8 +265,8 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     }
 
     END:
-    fprintf(traindata,"\n");
-    printf("calling SDP bound end\n");
+    printf("SDP solve time %.3f dimension %d rank %d count %d prune %d triag %d pent %d hept %d \n", MPI_Wtime()-sdpstartime, PP->n, rank, count, prune, PP->NIneq, PP->NPentIneq, PP->NHeptaIneq);
+
 
     return bound;
 
