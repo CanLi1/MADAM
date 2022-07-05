@@ -7,6 +7,11 @@ extern FILE *output;
 extern FILE *traindata;
 extern int BabPbSize;
 
+extern double root_basicSDP_bound;
+extern double root_bound;
+extern int maxcut_size;
+extern double maxcut_density;
+
 extern double TIME;                 
 
 extern Triangle_Inequality *Cuts;               // vector of triangle inequality constraints
@@ -71,8 +76,6 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     /* solve basic SDP relaxation with interior-point method */
     ipm_mc_pk(PP->L, PP->n, X, y, Q, &f, 0);
 
-    //save basic info of the node
-    fprintf(traindata,"%d ", PP->n);
 
     //get the number of nonzeros in L
     int nzero = 0;
@@ -82,7 +85,6 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
                 nzero ++;
         }
     }
-    fprintf(traindata,"%d %.3f", nzero, fixedvalue);
 
 
     // store basic SDP bound to compute diff in the root node
@@ -116,9 +118,6 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
 
     // upper bound
     bound = f + fixedvalue;
-
-    //store training data for basic SDP
-    fprintf(traindata,"[0 %.3f %.3f", bound, Bab_LBGet());
 
     // check pruning condition
     if ( bound < Bab_LBGet() + 1.0 ) {
@@ -157,9 +156,6 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
 
         // prune test
         prune = ( bound < Bab_LBGet() + 1.0 ) ? 1 : 0;
-
-        //save iteration info for training data
-        fprintf(traindata,"[%d %.3f %.3f", count, f + fixedvalue, Bab_LBGet());
  
         /******** heuristic ********/
         if (!prune) {
@@ -265,10 +261,214 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     }
 
     END:
-    printf("SDP solve time %.3f dimension %d rank %d count %d prune %d triag %d pent %d hept %d \n", MPI_Wtime()-sdpstartime, PP->n, rank, count, prune, PP->NIneq, PP->NPentIneq, PP->NHeptaIneq);
-
-
+    if (rank ==0){
+        fprintf(traindata, "%d %d %.3f %.3f %.3f %.3f \n", maxcut_size, PP->n, maxcut_density, bound,
+                root_basicSDP_bound,  Bab_LBGet());
+    }
     return bound;
+
+}
+
+
+double SDPdatacollection(BabNode *node, Problem *SP, Problem *PP, int rank) {
+    int cur_Pent_Trials;
+    int cur_Hepta_Trials;
+    cur_Pent_Trials = params.Pent_Trials;
+    cur_Hepta_Trials = params.Hepta_Trials;
+    printf("calling sdp datacollection\n");
+    for (int outer_iter = 0; outer_iter <= 5; outer_iter++) {
+        printf("number of outer iterations %d\n", outer_iter);
+        params.Pent_Trials = 60 * outer_iter;
+        params.Hepta_Trials = 50 * outer_iter;
+        double sdpstartime = MPI_Wtime();
+        int index;                      // helps to store the fractional solution in the node
+        double bound;                   // f + fixedvalue
+        double gap;                     // difference between best lower bound and upper bound
+        double oldf;                    // stores f from previous iteration
+        int x[BabPbSize];               // vector for heuristic
+        double viol3 = 0.0;             // maximum violation of triangle inequalities
+        double viol5 = 0.0;             // maximum violation of pentagonal inequalities
+        double viol7 = 0.0;             // maximum violation of heptagonal inequalities
+        int count = 0;                  // number of iterations (adding and purging of cutting planes)
+        int nbit;                       // number of iterations in ADMM method
+
+        int triag;                      // starting index for pentagonal inequalities in vectors t and s
+        int penta;                      // starting index for heptagonal inequalities in vectors t and s
+
+        /* stopping conditions */
+        int done = 0;
+        int giveup = 0;
+        int prune = 0;
+
+        // Parameters
+        double sigma = params.sigma0;
+        double tol = params.tol0;
+
+        // fixed value contributes to the objective value
+        double fixedvalue = getFixedValue(node, SP);
+        /*** start with no cuts ***/
+        // triangle inequalities
+        PP->NIneq = 0;
+        int Tri_NumAdded = 0;
+        int Tri_NumSubtracted = 0;
+
+        // pentagonal inequalities
+        PP->NPentIneq = 0;
+        int Pent_NumAdded = 0;
+        int Pent_NumSubtracted = 0;
+
+        // heptagonal inequalities
+        PP->NHeptaIneq = 0;
+        int Hepta_NumAdded = 0;
+        int Hepta_NumSubtracted = 0;
+
+        /* solve basic SDP relaxation with interior-point method */
+        ipm_mc_pk(PP->L, PP->n, X, y, Q, &f, 0);
+
+        //get the number of nonzeros in L
+        int nzero = 0;
+        for (int i = 0; i < PP->n; ++i) {
+            for (int j = 0; j < PP->n; ++j) {
+                if (fabs(PP->L[j + i * PP->n]) > 0.00001)
+                    nzero++;
+            }
+        }
+
+
+        // store basic SDP bound to compute diff in the root node
+        double basic_bound = f + fixedvalue;
+
+        if (rank == 0){
+            root_basicSDP_bound = basic_bound;
+        }
+
+        //save basic info of the node and the rootnode
+        fprintf(traindata, "%d %.3f %.3f ", PP->n, basic_bound, Bab_LBGet());
+
+//
+//        fprintf(traindata, "%d %d %.3f %.3f %.3f %.3f %.3f ", maxcut_size, PP->n, maxcut_density, root_bound,
+//                root_basicSDP_bound, basic_bound, Bab_LBGet());
+        //save number of pent and hepta trials
+        fprintf(traindata, "%d %d ", params.Pent_Trials, params.Hepta_Trials);
+
+        // check pruning condition
+        if (basic_bound < Bab_LBGet() + 1.0) {
+            prune = 1;
+            //save iteration info to 0 ADMM iteration
+            fprintf(traindata, "0 %.3f %.3f\n", basic_bound, MPI_Wtime() - sdpstartime);
+            printf("break from basic bound");
+            break;
+        }
+
+
+        /* separate first triangle inequality */
+        viol3 = updateTriangleInequalities(PP, s, &Tri_NumAdded, &Tri_NumSubtracted);
+
+        //record the iteration stats
+        double iter_time[params.max_outer_iter + params.extra_iter];
+        double iter_bound[params.max_outer_iter + params.extra_iter];
+        int iter_num_tri_cuts[params.max_outer_iter + params.extra_iter];
+        int iter_num_pent_cuts[params.max_outer_iter + params.extra_iter];
+        int iter_num_hepta_cuts[params.max_outer_iter + params.extra_iter];
+        /*** Main loop ***/
+        while (!done) {
+
+            // Update iteration counter
+            ++count;
+
+            // Call ADMM solver
+            ADMM_solver(PP, X, y, Q, &sigma, tol, &nbit, 0);
+
+            // increase precision
+            tol *= params.scaleTol;
+
+            if (tol < params.minTol)
+                tol = params.minTol;
+
+            // upper bound
+            bound = f + fixedvalue;
+
+            // prune test
+            prune = (bound < Bab_LBGet() + 1.0) ? 1 : 0;
+
+            //Update iteration stats
+            iter_time[count-1] = MPI_Wtime() - sdpstartime;
+            iter_bound[count-1] = bound;
+            iter_num_tri_cuts[count-1] = PP->NIneq;
+            iter_num_pent_cuts[count-1] = PP->NPentIneq;
+            iter_num_hepta_cuts[count-1] = PP->NHeptaIneq;
+
+            // compute gap
+            gap = bound - Bab_LBGet();
+
+            /* check if we will not be able to prune the node */
+            if (count == params.triag_iter + params.pent_iter + params.hept_iter) {
+                if ((gap - 1.0 > (oldf - f) * (params.max_outer_iter - count)))
+                    giveup = 1;
+            }
+
+            /* check if extra iterations can close the gap */
+            if (count == params.max_outer_iter) {
+                if (gap - 1.0 > (oldf - f) * params.extra_iter)
+                    giveup = 1;
+            }
+
+            /* max number of iterations reached */
+            if (count == params.max_outer_iter + params.extra_iter)
+                giveup = 1;
+
+            // purge inactive cutting planes, add new inequalities
+            if (!prune && !giveup) {
+
+                triag = PP->NIneq;          // save number of triangle and pentagonal inequalities before purging
+                penta = PP->NPentIneq;      // --> to know with which index in dual vector gamma, pentagonal
+                // and heptagonal inequalities start!
+
+                viol3 = updateTriangleInequalities(PP, s, &Tri_NumAdded, &Tri_NumSubtracted);
+
+                /* include pentagonal and heptagonal inequalities */
+                if (params.include_Pent && (count >= params.triag_iter || viol3 < 0.2))
+                    viol5 = updatePentagonalInequalities(PP, s, &Pent_NumAdded, &Pent_NumSubtracted, triag);
+
+                if (params.include_Hepta &&
+                    ((count >= params.triag_iter + params.pent_iter) || (viol3 < 0.2 && (1 - viol5 < 0.4))))
+                    viol7 = updateHeptagonalInequalities(PP, s, &Hepta_NumAdded, &Hepta_NumSubtracted, triag + penta);
+            } else {
+                Tri_NumAdded = 0;
+                Tri_NumSubtracted = 0;
+                Pent_NumAdded = 0;
+                Pent_NumSubtracted = 0;
+                Hepta_NumAdded = 0;
+                Hepta_NumSubtracted = 0;
+            }
+
+
+
+
+            // Test stopping conditions
+            done =
+                    prune ||                         // can prune the B&B tree
+                    giveup ||                        // upper bound to far away from lower bound
+                    (nbit >= params.ADMM_itermax);   // ADMM reached max iter
+
+
+        } // end while loop
+
+        bound = f + fixedvalue;
+
+        //Save data for all the iterations
+        //save final iteration, bound, and time
+        fprintf(traindata, "{%d %.3f %.3f}", count, bound, MPI_Wtime()-sdpstartime);
+        for (int i=0; i<count; ++i){
+            fprintf(traindata, "[%d %.3f %.3f %d %d %d]", i+1, iter_bound[i], iter_time[i],
+                    iter_num_tri_cuts[i], iter_num_pent_cuts[i], iter_num_hepta_cuts[i]);
+        }
+	fprintf(traindata, "\n");
+    }
+    //recover the MADAM parameter
+    params.Pent_Trials = cur_Pent_Trials;
+    params.Hepta_Trials = cur_Hepta_Trials;
+    return 0;
 
 }
 

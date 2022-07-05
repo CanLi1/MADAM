@@ -10,7 +10,9 @@ extern FILE *output;
 extern FILE *traindata;
 extern Parameters params;
 extern Problem *SP;             
-extern Problem *PP;            
+extern Problem *PP;
+extern double maxcut_density;
+extern int maxcut_size;
 extern int BabPbSize;
 
 // macro to handle the errors in the input reading
@@ -219,6 +221,10 @@ int readData(const char *instance) {
     // OUTPUT information on instance
     fprintf(stdout, "\nGraph has %d vertices and %d edges.\n", num_vertices, num_edges);
     fprintf(output, "\nGraph has %d vertices and %d edges.\n", num_vertices, num_edges);
+
+    //get the properties of the adjacency matrix
+    maxcut_size = num_vertices;
+    maxcut_density = (double) num_edges / num_vertices / (num_vertices - 1) * 2;
 
     // read edges and store them in matrix Adj
     // NOTE: last node is fixed to 0

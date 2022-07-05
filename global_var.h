@@ -9,6 +9,9 @@ FILE *traindata;                    // file for saving training data
 Problem *SP;                        // original problem instance
 Problem *PP;                        // subproblem instance
 double root_bound;                  // SDP upper bound at root node
+double root_basicSDP_bound;          // basic SDP bound at the root node
+int maxcut_size;                    //size of the maxcut problem
+double maxcut_density;               // density of the maxcut problem
 double TIME;                        // CPU time
 int stopped = 0;                    // true if the algorithm stopped at root node
 double diff;			            // difference between basic SDP relaxation and bound with added cutting planes  

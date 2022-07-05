@@ -233,6 +233,7 @@ int countFixedVariables(BabNode *node);
 
 /* bounding.c */
 double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank);
+double SDPdatacollection(BabNode *node, Problem *SP, Problem *PP, int rank);
 
 /* cutting_planec.c */
 double evaluateTriangleInequality(double *XX, int N, int type, int ii, int jj, int kk);

@@ -16,6 +16,7 @@ extern Problem *SP;
 extern Problem *PP;
 
 extern double root_bound;
+extern double root_basicSDP_bound;
 extern double TIME;
 extern int stopped;
 
@@ -50,6 +51,7 @@ int Init_PQ(void) {
     // Evaluate root node: compute upper and lower bound 
     root_bound = Evaluate(BabRoot, SP, PP, 0);
     printf("Root node bound: %.2f\n", root_bound);
+
 
     // save upper bound
     BabRoot->upper_bound = root_bound;
