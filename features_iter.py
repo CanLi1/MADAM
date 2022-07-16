@@ -128,11 +128,14 @@ f.write(' '.join([str(e) for e in scaler.mean_]) + '\n')
 f.write(' '.join([str(np.sqrt(e)) for e in scaler.var_]) + '\n')
 #write svm 
 f.write(str(clf.intercept_[0]) + "\n")
-f.write(str(len(clf.support_vectors_) + "\n"))
-f.write(' '.join([str(e) for e in clf.dual_coef_[0]]) + '\n')
+f.write(str(clf.gamma) + "\n")
+f.write(str(len(clf.support_vectors_)) + "\n")
+i = 0
 for supp_vec in clf.support_vectors_:
-    f.write(' '.join([str(e) for e in supp_vec]) + '\n')
+    f.write(str(clf.dual_coef_[0][i]) + " " + ' '.join([str(e) for e in supp_vec]) + '\n')
+    i += 1
 
+f.close()
 
 
 # #define 6 different classifiers and train 

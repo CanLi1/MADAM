@@ -170,31 +170,44 @@ for i in range(6):
     print("recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))
     print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
 
-#define 6 different classifiers and train 
-for i in range(6):
-    X_train_i = []
-    y_train_fathom_i = []
-    for j in range(len(X_train)):
-        if j % 6 == i:
-            X_train_i.append(np.array([X_train[j][0], X_train[j][2], X_train[j][3], X_train[j][4], X_train[j][5]]))
-            y_train_fathom_i.append(y_train_fathom[j])
-    scaler = preprocessing.StandardScaler().fit(X_train_i)
-    X_train_scaled = scaler.transform(X_train_i)
-    f_static, p_values = f_classif(X_train_scaled, y_train_fathom_i)    
-    clf = svm.SVC(C=1000, gamma=0.001)
-    clf.fit(X_train_scaled, y_train_fathom_i)
-    fitted = clf.predict(X_train_scaled)     
-    n_00 = sum([1 if (y_train_fathom_i[j] ==0 and fitted[j] == 0) else 0 for j in range(len(y_train_fathom_i))])
-    n_01 = sum([1 if (y_train_fathom_i[j] ==0 and fitted[j] == 1 ) else 0 for j in range(len(y_train_fathom_i))])
-    n_11 = sum([1 if (y_train_fathom_i[j] ==1 and fitted[j] == 1 ) else 0 for j in range(len(y_train_fathom_i))])
-    n_10 = sum([1 if (y_train_fathom_i[j] ==1 and fitted[j] == 0 ) else 0 for j in range(len(y_train_fathom_i))])
-    print("number of cuts = ", i, "\n ")
-    print("accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
-    if n_01 + n_11 != 0:
-        print("precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
-    print("recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))    
-    print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
+# #define 6 different classifiers and train 
+# for i in range(6):
+#     X_train_i = []
+#     y_train_fathom_i = []
+#     for j in range(len(X_train)):
+#         if j % 6 == i:
+#             X_train_i.append(np.array([X_train[j][0], X_train[j][2], X_train[j][3], X_train[j][4], X_train[j][5]]))
+#             y_train_fathom_i.append(y_train_fathom[j])
+#     scaler = preprocessing.StandardScaler().fit(X_train_i)
+#     X_train_scaled = scaler.transform(X_train_i)
+#     f_static, p_values = f_classif(X_train_scaled, y_train_fathom_i)    
+#     clf = svm.SVC(C=1000, gamma=0.001)
+#     clf.fit(X_train_scaled, y_train_fathom_i)
+#     fitted = clf.predict(X_train_scaled)     
+#     n_00 = sum([1 if (y_train_fathom_i[j] ==0 and fitted[j] == 0) else 0 for j in range(len(y_train_fathom_i))])
+#     n_01 = sum([1 if (y_train_fathom_i[j] ==0 and fitted[j] == 1 ) else 0 for j in range(len(y_train_fathom_i))])
+#     n_11 = sum([1 if (y_train_fathom_i[j] ==1 and fitted[j] == 1 ) else 0 for j in range(len(y_train_fathom_i))])
+#     n_10 = sum([1 if (y_train_fathom_i[j] ==1 and fitted[j] == 0 ) else 0 for j in range(len(y_train_fathom_i))])
+#     print("number of cuts = ", i, "\n ")
+#     print("accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
+#     if n_01 + n_11 != 0:
+#         print("precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
+#     print("recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))    
+#     print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
 
+#write decision boundary to file 
+f = open("svm.txt", "w")
+#write scaler mean and std
+f.write(' '.join([str(e) for e in scaler.mean_]) + '\n')
+f.write(' '.join([str(np.sqrt(e)) for e in scaler.var_]) + '\n')
+#write svm 
+f.write(str(clf.intercept_[0]) + "\n")
+f.write(str(clf.gamma) + "\n")
+f.write(str(len(clf.support_vectors_)) + "\n")
+for j in range(len(clf.support_vectors_)):
+    f.write(str(clf.dual_coef_[0][j]) + " " + ' '.join([str(e) for e in clf.support_vectors_[j]]) + '\n')
+
+f.close()
 #
 # # predicted = clf.predict(X_test_scaled)
 # # print("test accuracy ", accuracy_score(y_test, predicted))
