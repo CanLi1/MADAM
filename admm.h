@@ -128,6 +128,8 @@ typedef struct Problem {
 } Problem;
 
 
+
+
 /* Maximum number of variables */
 #define NMAX 1024
 
@@ -163,7 +165,17 @@ typedef struct Heap {
     BabNode** data;         /* array of BabNodes                  */  
 } Heap;
 
-
+/*structure for saving SVM classifier */
+typedef struct SVM {
+   int n_support;
+   int n_features;
+   double gamma;
+   double * scaler_mean;
+   double * scaler_std;
+   double ** support_vectors;
+   double * dual_coef;
+   double intercept;
+} SVM;
 
 /****** BLAS  ******/
 
@@ -234,6 +246,7 @@ int countFixedVariables(BabNode *node);
 /* bounding.c */
 double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank);
 double SDPdatacollection(BabNode *node, Problem *SP, Problem *PP, int rank);
+double svm_predict(SVM * svm, double * x);
 
 /* cutting_planec.c */
 double evaluateTriangleInequality(double *XX, int N, int type, int ii, int jj, int kk);
@@ -283,6 +296,8 @@ void print_symmetric_matrix(double *Mat, int N);
 int processCommandLineArguments(int argc, char **argv, int rank);
 int readData(const char *instance);
 int readParameters(const char *path, int rank);
+char** str_split(char* a_str, const char a_delim);
+SVM * read_svm();
 
 /* qap_simuted_annealing.c */
 double qap_simulated_annealing(int *H, int k, double *X, int n, int *pent);

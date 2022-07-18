@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <sys/stat.h>   // for numbering of output files
 #include <mpi.h>
-
+#include <assert.h>
 #include "admm.h"
 
 extern FILE *output;
@@ -14,6 +15,7 @@ extern Problem *PP;
 extern double maxcut_density;
 extern int maxcut_size;
 extern int BabPbSize;
+extern SVM * svm;
 
 // macro to handle the errors in the input reading
 #define READING_ERROR(file,cond,message)\
@@ -102,6 +104,9 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
             MPI_Bcast(&(SP->n), 1, MPI_INT, 0, MPI_COMM_WORLD);
             MPI_Bcast(SP->L, SP->n * SP->n, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
         }
+
+
+
             
     }
     else {
@@ -131,6 +136,9 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
         int incy = 1;
         dcopy_(&N2, SP->L, &incx, PP->L, &incy);
     }    
+    
+    //read svm classifier and broadcast
+    svm = read_svm();
     
     // Read the parameters from a user file
     read_error = readParameters(argv[2], rank);
@@ -333,4 +341,135 @@ int readData(const char *instance) {
     free(tmp);  
 
     return 0;
+}
+
+char** str_split(char* a_str, const char a_delim)
+{
+    char** result    = 0;
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    /* Count how many elements will be extracted. */
+    while (*tmp)
+    {
+        if (a_delim == *tmp)
+        {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+
+    /* Add space for trailing token. */
+    count += last_comma < (a_str + strlen(a_str) - 1);
+
+    /* Add space for terminating null string so caller
+       knows where the list of returned strings ends. */
+    count++;
+
+    result = malloc(sizeof(char*) * count);
+
+    if (result)
+    {
+        size_t idx  = 0;
+        char* token = strtok(a_str, delim);
+
+        while (token)
+        {
+            assert(idx < count);
+            *(result + idx++) = strdup(token);
+            token = strtok(0, delim);
+        }
+        assert(idx == count - 1);
+        *(result + idx) = 0;
+    }
+
+    return result;
+}
+
+
+
+
+SVM * read_svm(){
+   FILE* file = fopen("svm.txt", "r"); /* should check the result */
+
+    char line[10000];
+    SVM * svm = malloc(sizeof(SVM));
+    svm->n_features = 6;
+    svm->scaler_mean = malloc( svm->n_features * sizeof(double));
+    svm->scaler_std = malloc( svm->n_features * sizeof(double));
+  
+    // svm->scaler_std[5] = 1.2;
+    // printf("%.3f\n", svm->scaler_std[5]);
+    int line_num = 0;
+    while (fgets(line, sizeof(line), file)) {
+        /* note that fgets don't strip the terminating \n, checking its
+           presence would allow to handle lines longer that sizeof(line) */
+        // printf("%s", line); 
+
+         // Extract the first token
+      char** tokens;
+      tokens = str_split(line, ' ');
+
+       if (tokens)
+       {
+           int i;
+           for (i = 0; *(tokens + i); i++)
+           {
+               
+               double data;
+               char *eptr;
+               data =  strtod(*(tokens + i), &eptr);
+
+               if (line_num == 0){
+                  svm->scaler_mean[i] = data;
+               }
+
+               else if (line_num == 1){
+                  svm->scaler_std[i] = data;
+               }
+
+               else if (line_num == 2){
+                  svm->intercept = data;
+               }
+
+               else if (line_num == 3){
+                  svm->gamma = data;
+               }               
+
+               else if (line_num == 4){
+                  svm->n_support = (int) data;
+                  svm->dual_coef = malloc( svm->n_support * sizeof(double));
+                  
+                  svm->support_vectors = (double **)malloc(svm->n_support * sizeof(double*));
+                  for(int i = 0; i < svm->n_support; i++) svm->support_vectors[i] = (double *)malloc(svm->n_features * sizeof(double));
+               }
+
+               else {
+                  if (i == 0){
+                     svm->dual_coef[line_num-5] = data;
+                  }
+                  else{
+                     svm->support_vectors[line_num-5][i-1] = data;
+                  }
+               }
+
+
+               free(*(tokens + i));
+           }
+           free(tokens);
+       }
+       line_num +=1;   
+    }
+    /* may check feof here to make a difference between eof and io failure -- network
+       timeout for instance */
+
+    fclose(file);
+   //print out svm 
+
+   return svm;
 }

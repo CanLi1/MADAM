@@ -11,6 +11,7 @@ extern double root_basicSDP_bound;
 extern double root_bound;
 extern int maxcut_size;
 extern double maxcut_density;
+extern SVM * svm;
 
 extern double TIME;                 
 
@@ -30,6 +31,10 @@ extern double diff;		            // difference between basic SDP relaxation and 
 /******** main bounding routine calling ADMM method ********/
 double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
 //    printf("calling SDP bound start\n");
+    //test svm predict 
+    double new_feauture[6] = {1, 2.0, 3, 4, 5, 6};
+   double val = svm_predict(svm, new_feauture);
+    printf("prediction from rank %d, %.3f\n", rank, val);
     double sdpstartime = MPI_Wtime();
     int index;                      // helps to store the fractional solution in the node
     double bound;                   // f + fixedvalue
@@ -470,5 +475,21 @@ double SDPdatacollection(BabNode *node, Problem *SP, Problem *PP, int rank) {
     params.Hepta_Trials = cur_Hepta_Trials;
     return 0;
 
+}
+
+double svm_predict(SVM * svm, double * x){
+   // for (int i =0; i<svm->n_features; i++){
+   //    x[i] = (x[i]- svm->scaler_mean[i]) / svm->scaler_std[i];
+   // }
+   double val = svm->intercept;
+   double gamma = svm->gamma;
+   for (int i = 0; i < svm->n_support; i++){
+      double dot_product = 0.0;
+      for (int j=0; j< svm->n_features; j++){
+      dot_product += (x[j] - svm->support_vectors[i][j]) * (x[j] - svm->support_vectors[i][j]);
+   }
+   val += svm->dual_coef[i] * exp(-gamma * dot_product);
+   }
+   return val;
 }
 

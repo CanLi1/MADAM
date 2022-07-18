@@ -14,7 +14,8 @@ int maxcut_size;                    //size of the maxcut problem
 double maxcut_density;               // density of the maxcut problem
 double TIME;                        // CPU time
 int stopped = 0;                    // true if the algorithm stopped at root node
-double diff;			            // difference between basic SDP relaxation and bound with added cutting planes  
+double diff;			            // difference between basic SDP relaxation and bound with added cutting planes 
+SVM * svm; 
 /********************************************************/
 
 
