@@ -11,6 +11,8 @@ extern Parameters params;
 extern double TIME;
 extern FILE *output;
 extern  FILE *traindata;
+extern double root_bound;
+extern double root_basicSDP_bound;
 
 int num_workers_used = 0;
 
@@ -94,6 +96,8 @@ int main(int argc, char **argv) {
         // only master evaluates the root node
         // and places it in priority queue if not able to prune
         over = Init_PQ();
+        MPI_Bcast(&root_bound, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
+        MPI_Bcast(&root_basicSDP_bound, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
 
 	printf("Initial lower bound: %.0lf\n", Bab_LBGet());    
 	
@@ -185,6 +189,10 @@ int main(int argc, char **argv) {
      /******************** WORKER PROCESS ********************/
     else
     {
+    //receive root_bound 
+    MPI_Bcast(&root_bound, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
+    MPI_Bcast(&root_basicSDP_bound, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
+
 		// receive diff
 	if (params.use_diff)
 	    MPI_Bcast(&diff, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);

@@ -18,7 +18,8 @@ double Evaluate(BabNode *node, Problem *SP, Problem *PP, int rank) {
     // compute the SDP upper bound and run heuristic
     // SDPdatacollection(node, SP, PP, rank);
     double bound = SDPbound(node, SP, PP, rank);
-
+    // double bound = SDPboundsvm(node, SP, PP, rank);
+    // double bound = biqmacbound(node, SP, PP, rank);
 
     return bound;
 }

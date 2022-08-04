@@ -1,0 +1,36 @@
+Input file: Instances/rudy/pm1d_80.0
+
+Graph has 80 vertices and 3128 edges.
+Parameters:
+              sigma0 = 1.000000
+          scaleSigma = 1.001000
+        ADMM_itermax = 2000
+                tol0 = 0.050000
+            scaleTol = 0.600000
+              minTol = 0.001000
+          triag_iter = 3
+           pent_iter = 3
+           hept_iter = 3
+      max_outer_iter = 12
+          extra_iter = 5
+    violated_TriIneq = 0.001000
+             TriIneq = 800
+      adjust_TriIneq = 1
+            PentIneq = 5000
+           HeptaIneq = 5000
+         Pent_Trials = 60
+        Hepta_Trials = 50
+        include_Pent = 1
+       include_Hepta = 1
+                root = 0
+            use_diff = 1
+   branchingStrategy = 1
+
+Nodes = 57
+Root node bound = 231.13
+Maximum value = 227
+Solution = ( 1 2 3 7 8 9 10 13 14 15 16 19 22 23 26 27 32 33 34 36 40 43 44 45 47 49 56 57 58 60 61 63 64 65 67 70 72 73 75 77 78 )
+Time = 1.75 s
+
+Number of cores: 10
+Maximum number of workers used: 9

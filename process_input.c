@@ -103,6 +103,8 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
         else {
             MPI_Bcast(&(SP->n), 1, MPI_INT, 0, MPI_COMM_WORLD);
             MPI_Bcast(SP->L, SP->n * SP->n, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
+            MPI_Bcast(&maxcut_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+            MPI_Bcast(&maxcut_density, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
         }
 
 
@@ -135,11 +137,14 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
         int incx = 1;
         int incy = 1;
         dcopy_(&N2, SP->L, &incx, PP->L, &incy);
+
+        MPI_Bcast(&maxcut_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(&maxcut_density, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }    
     
     //read svm classifier and broadcast
     svm = read_svm();
-    
+
     // Read the parameters from a user file
     read_error = readParameters(argv[2], rank);
     if (read_error)

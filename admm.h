@@ -247,6 +247,8 @@ int countFixedVariables(BabNode *node);
 double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank);
 double SDPdatacollection(BabNode *node, Problem *SP, Problem *PP, int rank);
 double svm_predict(SVM * svm, double * x);
+double SDPboundsvm(BabNode *node, Problem *SP, Problem *PP, int rank);
+double biqmacbound(BabNode *node, Problem *SP, Problem *PP, int rank);
 
 /* cutting_planec.c */
 double evaluateTriangleInequality(double *XX, int N, int type, int ii, int jj, int kk);
