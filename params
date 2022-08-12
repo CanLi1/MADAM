@@ -18,6 +18,6 @@ Pent_Trials 	  = 60
 Hepta_Trials 	  = 50
 include_Pent 	  = 1
 include_Hepta 	  = 1
-root 		  =0 
+root 		  = 0 
 use_diff 	  = 1
 branchingStrategy = 1

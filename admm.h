@@ -155,6 +155,8 @@ typedef struct BabNode {
     int level;              // level (depth) of the node in B&B tree     
     double upper_bound;     // upper bound on solution value of max-cut, i.e. MC <= upper_bound.
                             // Used for determining the next node in priority queue.  
+    int fathom_level;
+    double parent_bound;
 } BabNode;
 
 
@@ -249,6 +251,7 @@ double SDPdatacollection(BabNode *node, Problem *SP, Problem *PP, int rank);
 double svm_predict(SVM * svm, double * x);
 double SDPboundsvm(BabNode *node, Problem *SP, Problem *PP, int rank);
 double biqmacbound(BabNode *node, Problem *SP, Problem *PP, int rank);
+double SDPdatacollectionbyncuts(BabNode *node, Problem *SP, Problem *PP, int rank);
 
 /* cutting_planec.c */
 double evaluateTriangleInequality(double *XX, int N, int type, int ii, int jj, int kk);

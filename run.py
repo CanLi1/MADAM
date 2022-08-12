@@ -7,7 +7,7 @@ ins_create100 = ["unweighted_100_01_1","unweighted_100_01_2","unweighted_100_01_
 # for i in ins_150:
 # 	os.system("mpirun -n 10 ./admm Instances/rudy/rudy_150/ro_1/" + i + " params")
 for i in ins_rudy_small:
-	os.system("mpirun -n 10 ./admm Instances/rudy/" + i + " params svm02cuts")
+	os.system("mpirun -n 10 ./admm Instances/rudy/" + i + " params svmhighprecision")
 	
 	
 # for i in ins_create100:

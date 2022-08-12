@@ -161,8 +161,27 @@ BabNode* newNode(BabNode *parentNode) {
         }
     }
 
+    //copy the frac sol from parent node 
+
     // child is one level deeper than parent
     node->level = (parentNode == NULL) ? 0 : parentNode->level + 1;
+
+    //initalize fathom level 
+    if (parentNode == NULL){
+        node->fathom_level = 0;
+    }
+    else if (parentNode->fathom_level==0){
+        node->fathom_level = 0;
+    }
+    else{
+        node->fathom_level = parentNode->fathom_level + 1;
+    }
+    if (parentNode != NULL){
+    // printf("parent node fathom_level %d node fathom_level %d\n", parentNode->fathom_level, node->fathom_level);
+    }
+
+    //initialize parent bound 
+    node->parent_bound = (parentNode == NULL) ?  0 : parentNode->upper_bound;
 
     return node;
 }

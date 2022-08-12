@@ -20,7 +20,7 @@ samples_dir = './Instances/rudy/'
 files = ["g05_100.0","g05_100.1","g05_100.2","g05_100.3","g05_100.4","g05_100.5","g05_100.6","g05_100.7","g05_100.8","g05_100.9","g05_60.0","pm1d_100.0","pm1d_100.1","pm1d_100.2","pm1d_100.3","pm1d_100.4","pm1d_100.5","pm1d_100.6","pm1d_100.7","pm1d_100.8","pm1d_100.9","pm1s_100.0","pm1s_100.1","pm1s_100.2","pm1s_100.3","pm1s_100.4","pm1s_100.5","pm1s_100.6","pm1s_100.7","pm1s_100.8","pm1s_100.9","pw01_100.0","pw01_100.1","pw01_100.2","pw01_100.3","pw01_100.4","pw01_100.5","pw01_100.6","pw01_100.7","pw01_100.8","pw01_100.9","pw05_100.0","pw05_100.1","pw05_100.2","pw05_100.3","pw05_100.4","pw05_100.5","pw05_100.6","pw05_100.7","pw05_100.8","pw05_100.9","pw09_100.0","pw09_100.1","pw09_100.2","pw09_100.3","pw09_100.4","pw09_100.5","pw09_100.6","pw09_100.7","pw09_100.8","pw09_100.9","w01_100.0","w01_100.1","w01_100.2","w01_100.3","w01_100.4","w01_100.5","w01_100.6","w01_100.7","w01_100.8","w01_100.9","w05_100.0","w05_100.1","w05_100.2","w05_100.3","w05_100.4","w05_100.5","w05_100.6","w05_100.7","w05_100.8","w05_100.9","w09_100.0","w09_100.1","w09_100.2","w09_100.3","w09_100.4","w09_100.5","w09_100.6","w09_100.7","w09_100.8","w09_100.9"]
 # files = ["unweighted_100_01_1","unweighted_100_01_2","unweighted_100_01_3","unweighted_100_01_4","unweighted_100_01_5","unweighted_100_02_1","unweighted_100_02_2","unweighted_100_02_3","unweighted_100_02_4","unweighted_100_02_5","unweighted_100_03_1","unweighted_100_03_2","unweighted_100_03_3","unweighted_100_03_4","unweighted_100_03_5","unweighted_100_04_1","unweighted_100_04_2","unweighted_100_04_3","unweighted_100_04_4","unweighted_100_04_5","unweighted_100_05_1","unweighted_100_05_2","unweighted_100_05_3","unweighted_100_05_4","unweighted_100_05_5","unweighted_100_06_1","unweighted_100_06_2","unweighted_100_06_3","unweighted_100_06_4","unweighted_100_06_5","unweighted_100_07_1","unweighted_100_07_2","unweighted_100_07_3","unweighted_100_07_4","unweighted_100_07_5","unweighted_100_08_1","unweighted_100_08_2","unweighted_100_08_3","unweighted_100_08_4","unweighted_100_08_5","unweighted_100_09_1","unweighted_100_09_2","unweighted_100_09_3","unweighted_100_09_4","unweighted_100_09_5"]
 
-all_files = [samples_dir +  file + "_test" for file in files]
+all_files = [samples_dir +  file + "_test2" for file in files]
 
 
 
@@ -42,33 +42,38 @@ x_ub_test_record = []
 x_lb_test_record = []
 instance_line_num_train = []
 instance_line_num_test = []
+
+a_file = all_files[0]
+
+
+
 #check if we can predict the MADAM relaxation from the basic SDP relaxation
-# for a_file in all_files:
-#     print(a_file)
 for a_file in all_files:
+    print(a_file)
+    print(len(X_train))
     line = os.popen("grep edges " + a_file+".output").readlines()[0]
     n_vertices = int(line.split()[2])
     n_edges = int(line.split()[5])
-    root = open(a_file + ".traindata0", "r" ).readlines()[-1].strip().split()
-    density = float(root[2])
-    rootadmm = float(root[3])
-    rootbasicSDP = float(root[4])
-    rootLB =  float(root[5])
-
-    for i in range(9):
+    root = open(a_file.replace("test2", "test1") + ".traindata0", "r" ).readlines()[-1].strip().split()
+    density = n_edges / n_vertices / (n_vertices-1) * 2
+    rootadmm = float(root[7])
+    rootbasicSDP = float(root[1])
+    rootLB =  float(root[8])
+    for i in range(2):
         lines = open(a_file + ".traindata" + str(i+1), "r" ).readlines()
         for line in lines:
             basicSDP = float(line.split()[1])
-            nodeLB = float(line.split()[2])
-            ncuts = int(line.split()[4]) /50
+            nodeLB = float(line.split("}")[0].split()[-2])
+            ncuts = int(line.split()[4]) /60
             time = float(line.split("}")[0].split()[-1])
-            admmbound = float(line.split("}")[0].split()[-2])
+            admmbound = float(line.split("}")[0].split()[-3])
             num_iter = int(line.split("{")[1].split()[0])
             nodedim = float(line.split()[0])
+            parent_bound = float(line.split()[2])
             new_data = np.array([n_vertices - nodedim, ncuts, time, basicSDP, nodeLB, admmbound, num_iter, density, rootadmm, rootbasicSDP, rootLB])
             X_data.append(new_data)
-
-            new_feature = np.array([n_vertices - nodedim, ncuts, basicSDP - nodeLB, density, rootadmm - nodeLB, rootbasicSDP - nodeLB])
+            new_feature = np.array([n_vertices - nodedim, basicSDP - nodeLB, density, rootadmm - nodeLB, rootbasicSDP - nodeLB])
+            # if parent_bound != 0 and parent_bound > nodeLB + 1:
             if a_file in train_data:
                 X_train.append(new_feature)
                 y_train_fathom.append(1 if admmbound <= nodeLB + 1 else 0)
@@ -78,9 +83,6 @@ for a_file in all_files:
 
             
 
-
-plot_ncuts = [x[1] for x in X_data if x[6]>=6]
-plot_time = [x[2] for x in X_data if x[6]>=6]
 
 
 # for i in range(len(X_data)):
@@ -117,11 +119,6 @@ plot_time = [x[2] for x in X_data if x[6]>=6]
 
 
 # predicted = regr.predict(X_test_scaled)
-
-
-with open('plot.txt', 'w') as fp:
-    for i in range(len(plot_ncuts)):
-        fp.write(str(plot_ncuts[i]) + " " + str(plot_time[i]) + "\n")
 # #get some statistics of these data 
 # time_mean = []
 # time_std = []
@@ -143,88 +140,74 @@ f_static, p_values = f_classif(X_train_scaled, y_train_fathom)
 # X_train_scaled = selector.transform(X_train_scaled)
 # X_test_scaled = selector.transform(X_test_scaled)
 
-# svc = svm.SVC()
+svc = svm.SVC()
 
 # #cross validation
-# # param_grid = [
-# #   {'C': [0.1, 1, 10, 100, 1000], 'kernel': ['linear']},
-# #   {'C': [0.1, 1, 10, 100, 1000], 'kernel': ['poly'], 'degree':[2, 3, 4]},
-# #   {'C': [0.1, 1, 10, 100, 1000], 'gamma': [0.001, 0.0001, 'scale', 'auto'], 'kernel': ['rbf']},
-# #  ]
-# # clf = GridSearchCV(svc, param_grid)
+# param_grid = [
+#   {'C': [0.1, 1, 10, 100, 1000], 'kernel': ['linear']},
+#   {'C': [0.1, 1, 10, 100, 1000], 'kernel': ['poly'], 'degree':[2, 3, 4]},
+#   {'C': [0.1, 1, 10, 100, 1000], 'gamma': [0.001, 0.0001, 'scale', 'auto'], 'kernel': ['rbf']},
+#  ]
 
-clf = svm.SVC(C=1000, gamma=0.001)
+# param_grid = [  {'C': [1000, 10000, 100000, 1000000], 'gamma': [1, 0.1, 0.01, 0.001, 0.0001, 'scale', 'auto'], 'kernel': ['rbf']}
+ # ] 
+# clf = GridSearchCV(svc, param_grid)
+
+clf = svm.SVC(C=1000000, gamma=0.001)
 
 clf.fit(X_train_scaled, y_train_fathom)
-fitted = clf.predict(X_train_scaled)
+y_score = clf.decision_function(X_train_scaled)
+fpr, tpr, thresholds = roc_curve(y_train_fathom, y_score)
+thred = np.argmax(tpr  -10* fpr)
+fitted = [1 if i >thresholds[thred] else 0 for i in y_score ]
+# fitted = clf.predict(X_train_scaled)
 n_00 = sum([1 if (y_train_fathom[j] ==0 and fitted[j] == 0) else 0 for j in range(len(y_train_fathom))])
 n_01 = sum([1 if (y_train_fathom[j] ==0 and fitted[j] == 1) else 0 for j in range(len(y_train_fathom))])
 n_11 = sum([1 if (y_train_fathom[j] ==1 and fitted[j] == 1) else 0 for j in range(len(y_train_fathom))])
 n_10 = sum([1 if (y_train_fathom[j] ==1 and fitted[j] == 0) else 0 for j in range(len(y_train_fathom))])
 print("the overall training stats\n")
-print("accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
-print("precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
-print("recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))
+print("accuracy ", "{0:.1%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
+print("precision ", "{0:.1%}".format((n_11)/ (n_01 + n_11 )))
+print("recall ", "{0:.1%}".format((n_11)/ (n_11 + n_10)))
 print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
-for i in range(6):
-    n_00 = sum([1 if (y_train_fathom[j] ==0 and fitted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
-    n_01 = sum([1 if (y_train_fathom[j] ==0 and fitted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
-    n_11 = sum([1 if (y_train_fathom[j] ==1 and fitted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
-    n_10 = sum([1 if (y_train_fathom[j] ==1 and fitted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
-    print("number of cuts = ", i, "\n ")
-    print("accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
-    print("precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
-    print("recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))
-    print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
+# for i in range(6):
+#     n_00 = sum([1 if (y_train_fathom[j] ==0 and fitted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
+#     n_01 = sum([1 if (y_train_fathom[j] ==0 and fitted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
+#     n_11 = sum([1 if (y_train_fathom[j] ==1 and fitted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
+#     n_10 = sum([1 if (y_train_fathom[j] ==1 and fitted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_train_fathom))])
+#     print("number of cuts = ", i, "\n ")
+#     print("accuracy ", "{0:.1%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
+#     print("precision ", "{0:.1%}".format((n_11)/ (n_01 + n_11 )))
+#     print("recall ", "{0:.1%}".format((n_11)/ (n_11 + n_10)))
+#     print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
 
-predicted = clf.predict(X_test_scaled)
+# predicted = clf.predict(X_test_scaled)
+y_score = clf.decision_function(X_test_scaled)
+predicted = [1 if i >thresholds[thred] else 0 for i in y_score ]
+
 n_00 = sum([1 if (y_test_fathom[j] ==0 and predicted[j] == 0) else 0 for j in range(len(y_test_fathom))])
 n_01 = sum([1 if (y_test_fathom[j] ==0 and predicted[j] == 1) else 0 for j in range(len(y_test_fathom))])
 n_11 = sum([1 if (y_test_fathom[j] ==1 and predicted[j] == 1) else 0 for j in range(len(y_test_fathom))])
 n_10 = sum([1 if (y_test_fathom[j] ==1 and predicted[j] == 0) else 0 for j in range(len(y_test_fathom))])
 print("the overall test stats\n")
-print("test accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
-print("test precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
-print("test recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))
+print("test accuracy ", "{0:.1%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
+print("test precision ", "{0:.1%}".format((n_11)/ (n_01 + n_11 )))
+print("test recall ", "{0:.1%}".format((n_11)/ (n_11 + n_10)))
 print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
-for i in range(6):
-    n_00 = sum([1 if (y_test_fathom[j] ==0 and predicted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
-    n_01 = sum([1 if (y_test_fathom[j] ==0 and predicted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
-    n_11 = sum([1 if (y_test_fathom[j] ==1 and predicted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
-    n_10 = sum([1 if (y_test_fathom[j] ==1 and predicted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
-    print("number of cuts = ", i, "\n ")
-    print("test accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
-    print("test precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
-    print("test recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))
-    print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
-
-# #define 6 different classifiers and train 
 # for i in range(6):
-#     X_train_i = []
-#     y_train_fathom_i = []
-#     for j in range(len(X_train)):
-#         if j % 6 == i:
-#             X_train_i.append(np.array([X_train[j][0], X_train[j][2], X_train[j][3], X_train[j][4], X_train[j][5]]))
-#             y_train_fathom_i.append(y_train_fathom[j])
-#     scaler = preprocessing.StandardScaler().fit(X_train_i)
-#     X_train_scaled = scaler.transform(X_train_i)
-#     f_static, p_values = f_classif(X_train_scaled, y_train_fathom_i)    
-#     clf = svm.SVC(C=1000, gamma=0.001)
-#     clf.fit(X_train_scaled, y_train_fathom_i)
-#     fitted = clf.predict(X_train_scaled)     
-#     n_00 = sum([1 if (y_train_fathom_i[j] ==0 and fitted[j] == 0) else 0 for j in range(len(y_train_fathom_i))])
-#     n_01 = sum([1 if (y_train_fathom_i[j] ==0 and fitted[j] == 1 ) else 0 for j in range(len(y_train_fathom_i))])
-#     n_11 = sum([1 if (y_train_fathom_i[j] ==1 and fitted[j] == 1 ) else 0 for j in range(len(y_train_fathom_i))])
-#     n_10 = sum([1 if (y_train_fathom_i[j] ==1 and fitted[j] == 0 ) else 0 for j in range(len(y_train_fathom_i))])
+#     n_00 = sum([1 if (y_test_fathom[j] ==0 and predicted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
+#     n_01 = sum([1 if (y_test_fathom[j] ==0 and predicted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
+#     n_11 = sum([1 if (y_test_fathom[j] ==1 and predicted[j] == 1 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
+#     n_10 = sum([1 if (y_test_fathom[j] ==1 and predicted[j] == 0 and j % 6 == i) else 0 for j in range(len(y_test_fathom))])
 #     print("number of cuts = ", i, "\n ")
-#     print("accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
-#     if n_01 + n_11 != 0:
-#         print("precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
-#     print("recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))    
+#     print("test accuracy ", "{0:.1%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
+#     print("test precision ", "{0:.1%}".format((n_11)/ (n_01 + n_11 )))
+#     print("test recall ", "{0:.1%}".format((n_11)/ (n_11 + n_10)))
 #     print("n00 ", n_00, " n01 ", n_01, " n_11 ", n_11, " n_10 ", n_10, "\n")
 
+
 #write decision boundary to file 
-f = open("svm.txt", "w")
+f = open("svm2.txt", "w")
 #write scaler mean and std
 f.write(' '.join([str(e) for e in scaler.mean_]) + '\n')
 f.write(' '.join([str(np.sqrt(e)) for e in scaler.var_]) + '\n')
@@ -236,46 +219,6 @@ for j in range(len(clf.support_vectors_)):
     f.write(str(clf.dual_coef_[0][j]) + " " + ' '.join([str(e) for e in clf.support_vectors_[j]]) + '\n')
 
 f.close()
-#
-# # predicted = clf.predict(X_test_scaled)
-# # print("test accuracy ", accuracy_score(y_test, predicted))
-
-
-
-# #examine predicted results true label/ pred label
-# n_00 = 0
-# n_01 = 0
-# n_11 = 0
-# n_10 = 0
-# n_1_to_0 = 0
-# graphs = []
-# for i in range(len(y_train)):
-#     if y_train[i] == 0 and fitted[i] == 0:
-#         n_00 += 1
-#     elif y_train[i] == 0 and fitted[i] == 1:
-#         n_01 += 1
-#     elif y_train[i] == 1 and fitted[i] == 1:
-#         n_11 += 1
-#     else:
-#         n_10 += 1
-# # for i in range(len(y_test)):
-# #     if y_test[i] == 0 and predicted[i] == 0:
-# #         n_00 += 1
-# #     elif y_test[i] == 0 and predicted[i] == 1:
-# #         n_01 += 1
-# #     elif y_test[i] == 1 and predicted[i] == 1:
-# #         n_11 += 1
-# #     else:
-# #         n_10 += 1
-
-
-
-# print("accuracy ", "{0:.0%}".format((n_00 + n_11)/ (n_00 + n_01 + n_11 + n_10)))
-# print("precision ", "{0:.0%}".format((n_11)/ (n_01 + n_11 )))
-# print("recall ", "{0:.0%}".format((n_11)/ (n_11 + n_10)))
-# print("1 to 0 error", "{0:.2%}".format(n_1_to_0/ (n_00 + n_01 + n_11 + n_10)))
-
-
 
 
 

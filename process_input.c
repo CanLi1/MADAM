@@ -15,7 +15,8 @@ extern Problem *PP;
 extern double maxcut_density;
 extern int maxcut_size;
 extern int BabPbSize;
-extern SVM * svm;
+extern SVM * svm1;
+extern SVM * svm2;
 
 // macro to handle the errors in the input reading
 #define READING_ERROR(file,cond,message)\
@@ -143,8 +144,9 @@ int processCommandLineArguments(int argc, char **argv, int rank) {
     }    
     
     //read svm classifier and broadcast
-    svm = read_svm();
-
+    
+    svm1 = read_svm(1);
+    svm2 = read_svm(2);    
     // Read the parameters from a user file
     read_error = readParameters(argv[2], rank);
     if (read_error)
@@ -399,17 +401,19 @@ char** str_split(char* a_str, const char a_delim)
 
 
 
-SVM * read_svm(){
-   FILE* file = fopen("svm.txt", "r"); /* should check the result */
-
+SVM * read_svm(int ncuts){
+    char sncuts[10];
+    sprintf(sncuts, "%d", ncuts);
+    char svmfile[] = "svm"; 
+    strcat(svmfile, sncuts);
+    strcat(svmfile, ".txt");
+    FILE* file = fopen(svmfile, "r"); /* should check the result */
     char line[10000];
     SVM * svm = malloc(sizeof(SVM));
-    svm->n_features = 6;
+    svm->n_features = 5;
     svm->scaler_mean = malloc( svm->n_features * sizeof(double));
     svm->scaler_std = malloc( svm->n_features * sizeof(double));
-  
-    // svm->scaler_std[5] = 1.2;
-    // printf("%.3f\n", svm->scaler_std[5]);
+
     int line_num = 0;
     while (fgets(line, sizeof(line), file)) {
         /* note that fgets don't strip the terminating \n, checking its
@@ -475,6 +479,5 @@ SVM * read_svm(){
 
     fclose(file);
    //print out svm 
-
    return svm;
 }

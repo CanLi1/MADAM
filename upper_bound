@@ -1,0 +1,80 @@
+bab_functions.c:    node->upper_bound = Evaluate(node, SP, PP, rank);
+bab_functions.c:    /* if BabLB + 1.0 < child_node->upper_bound, 
+bab_functions.c:    // if (Bab_LBGet() + 1.0 < node->upper_bound) {
+bab_functions.c:    if (node->fathom_level<2){
+bab_functions.c:            child_node->xfixed[ic] = 1;
+bab_functions.c:            child_node->sol.X[ic] = xic;
+bab_functions.c:        printf("error check 1 rank %d fathom level %d node level %d \n", rank, node->fathom_level, node->level);
+bab_functions.c:        printf("%.3f %.3f %d %.3f %d\n", node->upper_bound, node->parent_bound, node->xfixed[0], node->fracsol[0], node->sol.X[0]);
+bab_functions.c:                printf("error check 2 rank %d fathom level %d node level %d \n", rank, node->fathom_level, node->level);
+bab_functions.c:                printf("%.3f %.3f %d %.3f %d\n", node->upper_bound, node->parent_bound, node->xfixed[0], node->fracsol[0], node->sol.X[0]);
+bab_functions.c:        printf("error check 3 rank %d fathom level %d node level %d \n", rank, node->fathom_level, node->level);
+bab_functions.c:        printf("%.3f %.3f %d %.3f %d\n", node->upper_bound, node->parent_bound, node->xfixed[0], node->fracsol[0], node->sol.X[0]);
+bab_functions.c:            if (!(node->xfixed[i]) && fabs(0.5 - node->fracsol[i]) > maxValue) {
+bab_functions.c:                maxValue = fabs(0.5 - node->fracsol[ic]);
+bab_functions.c:            if (!(node->xfixed[i]) && fabs(0.5 - node->fracsol[i]) < minValue) {
+bab_functions.c:                minValue = fabs(0.5 - node->fracsol[ic]);
+bab_functions.c:        if (node->xfixed[i]) {
+bounding.c:        if (node->xfixed[i]) {
+bounding.c:            node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:            node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+bounding.c:        if (node->xfixed[i]) {
+bounding.c:            x[i] = node->sol.X[i];
+bounding.c:                if (node->xfixed[i]) {
+bounding.c:                    x[i] = node->sol.X[i];
+bounding.c:            if (node->xfixed[i]) {
+bounding.c:                node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:                node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+bounding.c:        if (node->xfixed[i]) {
+bounding.c:            node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:            node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+bounding.c:    fprintf(traindata, "%d %.3f %.3f %.3f ", PP->n, basic_bound, Bab_LBGet(), node->parent_bound);
+bounding.c:        if (node->fathom_level == 0)
+bounding.c:            node->fathom_level = 1;
+bounding.c:                if (node->xfixed[i]) {
+bounding.c:                    x[i] = node->sol.X[i];
+bounding.c:            if (node->fathom_level == 0)
+bounding.c:                node->fathom_level = 1;
+bounding.c:            if (node->xfixed[i]) {
+bounding.c:                node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:                node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+bounding.c:        if (node->xfixed[i]) {
+bounding.c:            node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:            node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+bounding.c:        if (node->xfixed[i]) {
+bounding.c:            x[i] = node->sol.X[i];
+bounding.c:                if (node->xfixed[i]) {
+bounding.c:                    x[i] = node->sol.X[i];
+bounding.c:            if (node->xfixed[i]) {
+bounding.c:                node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:                node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+bounding.c:        if (node->xfixed[i]) {
+bounding.c:            node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:            node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+bounding.c:        if (node->xfixed[i]) {
+bounding.c:            x[i] = node->sol.X[i];
+bounding.c:                if (node->xfixed[i]) {
+bounding.c:                    x[i] = node->sol.X[i];
+bounding.c:            if (node->xfixed[i]) {
+bounding.c:                node->fracsol[i] = (double) node->sol.X[i];
+bounding.c:                node->fracsol[i] = 0.5*(X[(PP->n - 1) + index*PP->n] + 1.0); 
+evaluate.c:            if (!node->xfixed[i] && !node->xfixed[j]) {     // delete rows and cols of SP->L
+evaluate.c:            else if ( (node->xfixed[i] && node->sol.X[i] == 1) && !node->xfixed[j]) { // save fixed rows to add to diagonal
+evaluate.c:        if (!node->xfixed[i]) {
+evaluate.c:            if (node->xfixed[i] && node->xfixed[j]) {
+evaluate.c:                fixedvalue += SP->L[j + i*N] * node->sol.X[i] * node->sol.X[j];
+heap.c:            node->xfixed[i] = 0;
+heap.c:            node->sol.X[i] = 0;
+heap.c:            node->xfixed[i] = parentNode->xfixed[i];
+heap.c:            node->sol.X[i] = (node->xfixed[i]) ? parentNode->sol.X[i] : 0;
+heap.c:    node->level = (parentNode == NULL) ? 0 : parentNode->level + 1;
+heap.c:        node->fathom_level = 0;
+heap.c:        node->fathom_level = 0;
+heap.c:        node->fathom_level = parentNode->fathom_level + 1;
+heap.c:    node->parent_bound = (parentNode == NULL) ?  0 : parentNode->upper_bound;
+heuristic.c:            if (node->xfixed[i]) 
+heuristic.c:                sol[i] = node->sol.X[i];
+main.c:            child_node->xfixed[ic] = 1;
+main.c:            child_node->sol.X[ic] = xic;
+main_no_initial_branching.c:            child_node->xfixed[ic] = 1;
+main_no_initial_branching.c:            child_node->sol.X[ic] = xic;

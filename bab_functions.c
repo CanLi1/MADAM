@@ -263,7 +263,7 @@ void worker_Bab_Main(MPI_Datatype BabSolutiontype, MPI_Datatype BabNodetype, int
      * solution in this subproblem
      */
     if (Bab_LBGet() + 1.0 < node->upper_bound) {
-
+    // if (node->fathom_level<2){
         /***** branch *****/
 
         // Determine the variable x[ic] to branch on
@@ -286,6 +286,7 @@ void worker_Bab_Main(MPI_Datatype BabSolutiontype, MPI_Datatype BabNodetype, int
 
         // free parent node
         free(node); 
+        // printf("error check 1 rank %d end\n", rank);
 
         /************ distribute subproblems ************/
 
@@ -322,15 +323,18 @@ void worker_Bab_Main(MPI_Datatype BabSolutiontype, MPI_Datatype BabNodetype, int
                 MPI_Send(&over, 1, MPI_INT, free_workers[i], OVER, MPI_COMM_WORLD);
                 MPI_Send(&g_lowerBound, 1, MPI_DOUBLE, free_workers[i], LOWER_BOUND, MPI_COMM_WORLD);
                 MPI_Send(node, 1, BabNodetype, free_workers[i], PROBLEM, MPI_COMM_WORLD);
-
+                // printf("error check 2 rank %d fathom level %d node level %d ub %.3f parent ub %.3f xfixed %d fracsol %.3f sol %d\n", rank, node->fathom_level, node->level, node->upper_bound, node->parent_bound, node->xfixed[0], node->fracsol[0], node->sol.X[0]);
                 free(node);
+                // printf("error check 2 end\n");
             }    
         }                            
 
     }
     else {
         // otherwise, intbound <= BabLB, so we can prune
+        // printf("error check 3 rank %d fathom level %d node level %d ub %.3f parent ub %.3f xfixed %d fracsol %.3f sol %d\n", rank, node->fathom_level, node->level, node->upper_bound, node->parent_bound, node->xfixed[0], node->fracsol[0], node->sol.X[0]);
         free(node);
+        // printf("error check 3 end\n");
     }
 
 }  
