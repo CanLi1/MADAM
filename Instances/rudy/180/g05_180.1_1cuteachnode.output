@@ -1,0 +1,36 @@
+Input file: Instances/rudy/180/g05_180.1
+
+Graph has 180 vertices and 8055 edges.
+Parameters:
+              sigma0 = 1.000000
+          scaleSigma = 1.001000
+        ADMM_itermax = 2000
+                tol0 = 0.050000
+            scaleTol = 0.600000
+              minTol = 0.001000
+          triag_iter = 3
+           pent_iter = 3
+           hept_iter = 3
+      max_outer_iter = 12
+          extra_iter = 5
+    violated_TriIneq = 0.001000
+             TriIneq = 1800
+      adjust_TriIneq = 1
+            PentIneq = 5000
+           HeptaIneq = 5000
+         Pent_Trials = 60
+        Hepta_Trials = 50
+        include_Pent = 1
+       include_Hepta = 1
+                root = 0
+            use_diff = 1
+   branchingStrategy = 1
+
+Nodes = 84475
+Root node bound = 4540.13
+Maximum value = 4500
+Solution = ( 2 3 4 5 11 13 14 16 17 20 21 24 26 27 29 33 35 39 40 42 43 45 46 47 48 49 52 54 57 58 60 61 62 68 69 70 74 75 76 78 79 81 83 85 86 88 89 90 92 93 96 97 99 100 104 110 112 113 116 117 118 119 120 122 123 126 130 136 137 139 143 146 149 153 154 156 159 162 164 165 166 168 169 171 172 174 175 177 178 179 )
+Time = 21639.48 s
+
+Number of cores: 10
+Maximum number of workers used: 9

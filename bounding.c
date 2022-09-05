@@ -30,6 +30,7 @@ extern double f;                    // function value of relaxation
 
 extern double diff;		            // difference between basic SDP relaxation and bound with added cutting planes
 
+
 /******** main bounding routine calling ADMM method ********/
 double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     double sdpstartime = MPI_Wtime();
@@ -51,6 +52,7 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     int done = 0;                   
     int giveup = 0;                                   
     int prune = 0;
+    int admmsolve = 0;
 
     // Parameters
     double sigma = params.sigma0;
@@ -136,7 +138,7 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     /* separate first triangle inequality */
     viol3 = updateTriangleInequalities(PP, s, &Tri_NumAdded, &Tri_NumSubtracted);
 
-   
+    admmsolve = 1;
     /*** Main loop ***/
     while (!done) {
 
@@ -201,10 +203,10 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
         /* increase number of pentagonal and heptagonal inequalities (during separation)
          * if the gap is still too big 
          */
-        if ((rank != 0) && giveup && !prune) {
-            params.Pent_Trials += 60;    // add 3 types * 60 = 180 pentagonal inequalities
-            params.Hepta_Trials += 50;  // add 4 types * 50 = 200 heptagonal inequalities
-        }
+        // if ((rank != 0) && giveup && !prune) {
+        //     params.Pent_Trials += 60;    // add 3 types * 60 = 180 pentagonal inequalities
+        //     params.Hepta_Trials += 50;  // add 4 types * 50 = 200 heptagonal inequalities
+        // }
 
         // purge inactive cutting planes, add new inequalities
         if (!prune && !giveup) {
@@ -267,7 +269,7 @@ double SDPbound(BabNode *node, Problem *SP, Problem *PP, int rank) {
     //     fprintf(traindata, "%d %d %.3f %.3f %.3f %.3f \n", maxcut_size, PP->n, maxcut_density, bound,
     //             root_basicSDP_bound,  Bab_LBGet());
     // }
-    printf("prediction fathom %d, true fathom %d ncuts %d node solution time %.3f\n", 1-giveup, prune, params.Hepta_Trials /50, MPI_Wtime() - sdpstartime);
+    printf("prediction fathom %d, true fathom %d ncuts %d node solution time %.3f\n", admmsolve, prune, params.Hepta_Trials /50, MPI_Wtime() - sdpstartime);
     return bound;
 
 }
@@ -477,7 +479,7 @@ double SDPdatacollection(BabNode *node, Problem *SP, Problem *PP, int rank) {
 
 
 double SDPdatacollectionbyncuts(BabNode *node, Problem *SP, Problem *PP, int rank) {
-    int ncuts = 2;
+    int ncuts = 1;
     params.Pent_Trials = 60 * ncuts;
     params.Hepta_Trials = 50 * ncuts;
     double sdpstartime = MPI_Wtime();
@@ -711,7 +713,7 @@ double SDPdatacollectionbyncuts(BabNode *node, Problem *SP, Problem *PP, int ran
                 iter_num_tri_cuts[i], iter_num_pent_cuts[i], iter_num_hepta_cuts[i]);
     }
     fprintf(traindata, "\n");
-    printf("upper bound at rank %d is %.3f\n", rank, bound);
+    printf("prune at node is %d\n", prune);
     return bound;
 
 }

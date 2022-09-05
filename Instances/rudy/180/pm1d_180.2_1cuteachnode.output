@@ -1,0 +1,36 @@
+Input file: Instances/rudy/180/pm1d_180.2
+
+Graph has 180 vertices and 15949 edges.
+Parameters:
+              sigma0 = 1.000000
+          scaleSigma = 1.001000
+        ADMM_itermax = 2000
+                tol0 = 0.050000
+            scaleTol = 0.600000
+              minTol = 0.001000
+          triag_iter = 3
+           pent_iter = 3
+           hept_iter = 3
+      max_outer_iter = 12
+          extra_iter = 5
+    violated_TriIneq = 0.001000
+             TriIneq = 1800
+      adjust_TriIneq = 1
+            PentIneq = 5000
+           HeptaIneq = 5000
+         Pent_Trials = 60
+        Hepta_Trials = 50
+        include_Pent = 1
+       include_Hepta = 1
+                root = 0
+            use_diff = 1
+   branchingStrategy = 1
+
+Nodes = 54889
+Root node bound = 940.22
+Maximum value = 865
+Solution = ( 1 2 5 8 11 12 14 16 17 19 21 25 27 30 31 32 34 41 44 49 50 52 55 59 60 61 62 63 64 65 68 71 74 75 76 84 87 88 90 97 101 103 106 107 109 112 113 115 116 117 118 119 121 123 124 126 129 130 132 133 134 135 139 144 146 149 151 152 154 155 158 160 163 164 171 172 175 176 178 )
+Time = 14786.84 s
+
+Number of cores: 10
+Maximum number of workers used: 9

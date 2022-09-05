@@ -30,7 +30,7 @@ Nodes = 543
 Root node bound = 413.48
 Maximum value = 389
 Solution = ( 2 4 5 6 7 10 12 13 14 15 17 18 20 22 23 24 29 30 31 32 34 36 37 39 40 41 43 46 47 49 53 54 55 57 60 62 63 64 65 66 67 69 72 75 83 84 88 92 94 97 98 99 )
-Time = 17.33 s
+Time = 17.81 s
 
 Number of cores: 10
 Maximum number of workers used: 9
